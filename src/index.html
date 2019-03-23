@@ -78,10 +78,6 @@
             font-size: var(--font-size);
         }
 
-        .getURL {
-            display: none;
-        }
-
         .input {
             border: 0;
             outline: 0;
@@ -143,6 +139,10 @@
             background: var(--night-mode-foreground);
         }
 
+        .show {
+            display: block;
+        }
+
         @media only screen and (max-width: 425px) {
             :root {
                 --font-size: 20px;
@@ -176,18 +176,18 @@
         <label for="switch">Toggle Night Mode</label>
     </div>
     <div class="container">
-        <form method="POST" action="/parseLink">
+        <form method="POST" action="/.netlify/functions/parseLink">
             <label class="item" for="url">Enter the URL</label>
             <input name="url" class="item input" autocomplete="off" placeholder="magnet:?" type="url" id="url">
-            <button type="button" class="item button getURL">Get URL</button>
-            <button type="submit" class="item button goToURL">Go to URL</button>
+            <button name="getURL" type="submit" class="item button getURL">Get URL</button>
+            <button name="goToURL" type="submit" class="item button goToURL">Go to URL</button>
             <div class="item display"></div>
         </form>
     </div>
     <script>
-        document.querySelector(".night-mode").setAttribute("style", "display:block;");
-        document.querySelector(".getURL").setAttribute("style", "display:block;");
+        document.querySelector(".night-mode").classList += " show";
         document.querySelector(".goToURL").setAttribute("type", "button");
+        document.querySelector(".getURL").setAttribute("type", "button");
         const regex = new RegExp(/magnet.*/);
         const rootStyle = document.documentElement.style;
 
