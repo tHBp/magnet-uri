@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="shortcut icon" href="./favicon.ico">
+    <meta name="theme-color" content="#d2d2d2" />
+    <title>Convert MyLink Magnet URLs</title>
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <style>
+        html,
+        button,
+        input {
+            font-family: 'Raleway', sans-serif;
+        }
+
+        *:focus::placeholder {
+            opacity: 0;
+        }
+
+        ::placeholder {
+            opacity: 1;
+            transition: opacity 0.5s;
+        }
+
+        input:focus,
+        button:focus {
+            outline: none;
+        }
+
+        :root {
+            --font-size: 16px;
+            --max-width: 200px;
+            --body-background: #f9f9f9;
+            --button-color: #006900;
+            --text-color: black;
+            --night-mode-background: #bcbcbc;
+            --night-mode-foreground: white;
+        }
+
+        form {
+            display: contents;
+        }
+
+        body {
+            background-color: var(--body-background);
+            color: var(--text-color);
+            transition: background-color 1s ease-out, color 0.5s ease-out;
+        }
+
+        .container {
+            display: grid;
+            grid-gap: 60px;
+            align-content: center;
+            margin-top: 40vh;
+            padding: 10px;
+            font-size: var(--font-size);
+            grid-template-columns: auto auto;
+            justify-content: center;
+        }
+
+        .item {
+            text-align: center;
+        }
+
+        .button {
+            background-color: var(--button-color);
+            transition: background-color 1s ease-out;
+            border-color: var(--button-color);
+            border-radius: 15px 0;
+            color: whitesmoke;
+            padding: 5px;
+            font-size: var(--font-size);
+        }
+
+        .getURL {
+            display: none;
+        }
+
+        .input {
+            border: 0;
+            outline: 0;
+            color: var(--text-color);
+            transition: color 0.5s ease-out;
+            background: transparent;
+            border-bottom: 1px solid #b9b9b9;
+            font-size: var(--font-size);
+            max-width: var(--max-width);
+        }
+
+        .display {
+            grid-column: 1/3;
+            max-width: var(--max-width);
+            overflow-wrap: break-word;
+            user-select: all;
+        }
+
+        .night-mode {
+            display: none;
+        }
+
+        .night-mode input[type=checkbox] {
+            height: 0;
+            width: 0;
+            visibility: hidden;
+        }
+
+        .night-mode label {
+            cursor: pointer;
+            float: right;
+            margin: 20px 200px;
+            text-indent: -9999px;
+            width: 50px;
+            height: 30px;
+            background: var(--night-mode-background);
+            display: block;
+            border-radius: 100px;
+            position: relative;
+        }
+
+        .night-mode label:after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: var(--night-mode-foreground);
+            border-radius: 100px;
+        }
+
+        .night-mode input:checked+label {
+            background: var(--night-mode-background);
+        }
+
+        .night-mode input:checked+label:after {
+            left: calc(100% - 27px);
+            background: var(--night-mode-foreground);
+        }
+
+        @media only screen and (max-width: 425px) {
+            :root {
+                --font-size: 20px;
+            }
+
+            body {
+                transition: background-color 0.5s ease-out, color 0.2s ease-out;
+            }
+
+            .container {
+                margin-top: 10vh;
+                grid-template-columns: auto;
+            }
+
+            .button {
+                grid-column: 1/2;
+            }
+
+            .display {
+                grid-column: 1/2;
+                font-size: 10px;
+            }
+
+            .night-mode label {
+                margin: 20px;
+            }
+        }
+    </style>
+    <div class="night-mode">
+        <input type="checkbox" id="switch" />
+        <label for="switch">Toggle Night Mode</label>
+    </div>
+    <div class="container">
+        <form method="POST" action="/parseLink">
+            <label class="item" for="url">Enter the URL</label>
+            <input name="url" class="item input" autocomplete="off" placeholder="magnet:?" type="url" id="url">
+            <button type="button" class="item button getURL">Get URL</button>
+            <button type="submit" class="item button goToURL">Go to URL</button>
+            <div class="item display"></div>
+        </form>
+    </div>
+    <script>
+        document.querySelector(".night-mode").setAttribute("style", "display:block;");
+        document.querySelector(".getURL").setAttribute("style", "display:block;");
+        document.querySelector(".goToURL").setAttribute("type", "button");
+        const regex = new RegExp(/magnet.*/);
+        const rootStyle = document.documentElement.style;
+
+        const getURL = (enteredURL) => enteredURL.match(regex) ?
+            decodeURIComponent(enteredURL.match(regex)[0]) : null;
+
+        const toggleDarkMode = (isDarkMode) => {
+            rootStyle.setProperty("--body-background", isDarkMode ? "#282c35" : "#f9f9f9");
+            rootStyle.setProperty("--text-color", isDarkMode ? "#fff" : "#000");
+            rootStyle.setProperty("--button-color", isDarkMode ? "#3e3e3e" : "#006900");
+            rootStyle.setProperty("--night-mode-background", isDarkMode ? "#000" : "#bcbcbc");
+            document.querySelector("head > meta[name='theme-color']").setAttribute("content", isDarkMode ?
+                "#282c35" : "#d2d2d2");
+        }
+
+        document.querySelector(".getURL").addEventListener("click", () => {
+            document.querySelector(".display").innerText = getURL(document.querySelector(".input").value) ||
+                "Invalid URL";
+        });
+
+        document.querySelector("#switch")
+            .addEventListener("click", () => toggleDarkMode(document.querySelector("#switch").checked));
+
+        document.querySelector(".goToURL").addEventListener("click", () => {
+            const redirectURL = getURL(document.querySelector(".input").value);
+            if (redirectURL) {
+                return window.location.href = redirectURL;
+            }
+            document.querySelector(".display").innerText = "Invalid URL";
+        });
+    </script>
+</body>
+
+</html>
