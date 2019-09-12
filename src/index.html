@@ -15,7 +15,7 @@
 
 
 <body>
-    <style prop="root-styles">
+    <style>
         html,
         button,
         input {
@@ -49,6 +49,8 @@
             --light-button-color-background: #2196f3;
             --light-button-color-foreground: #fff;
             --light-color-switcher-background: #fce100;
+            --light-btc-color: #f7931a;
+            --light-eth-color: #627eea;
 
             /* Dark theme colors */
             --dark-body-background: #444;
@@ -56,6 +58,7 @@
             --dark-button-color-background: #222;
             --dark-button-color-foreground: #fff;
             --dark-color-switcher-background: #222;
+            --dark-btc-color: #222;
         }
 
         .theme-container {
@@ -65,6 +68,8 @@
             --button-color-background: var(--light-button-color-background);
             --button-color-foreground: var(--light-button-color-foreground);
             --color-switcher-background: var(--light-color-switcher-background);
+            --icon-btc-color: var(--light-btc-color);
+            --icon-eth-color: var(--light-eth-color);
         }
 
         .color-switcher:checked~.theme-container {
@@ -74,9 +79,13 @@
             --button-color-background: var(--dark-button-color-background);
             --button-color-foreground: var(--dark-button-color-foreground);
             --color-switcher-background: var(--dark-color-switcher-background);
+            --icon-btc-color: var(--dark-btc-color);
+            --icon-eth-color: var(--dark-btc-color);
         }
 
-        .base-colors {
+        .base {
+            display: flex;
+            flex-direction: column;
             background-color: var(--body-background);
             color: var(--text-color);
             transition: background-color 1s ease-out, color 0.5s ease-out;
@@ -107,13 +116,22 @@
             border: 0;
             white-space: nowrap;
         }
-    </style>
-    <style prop="form-context">
+
+        .display-none {
+            display: none;
+        }
+
+        footer {
+            flex-shrink: 0;
+            box-shadow: 0px -2px 20px 0px rgba(0, 0, 0, 0.25);
+            color: var(--text-color);
+        }
+
         .form {
             display: grid;
             grid-gap: 60px;
             align-content: center;
-            margin-top: 40vh;
+            margin-top: 30vh;
             padding: 10px;
             font-size: var(--font-size);
             grid-template-columns: auto auto;
@@ -221,8 +239,43 @@
             overflow-wrap: break-word;
             user-select: all;
         }
-    </style>
-    <style prop="color-switcher">
+
+        .contents {
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: space-evenly;
+            padding: 1.2rem 0;
+        }
+
+        .contents .donate-text {
+            flex: 0 0 100%;
+            text-align: center;
+            padding-bottom: 0.8rem;
+        }
+
+        .contents .text {
+            user-select: all;
+        }
+
+        .contents .text:hover {
+            font-weight: bold;
+        }
+
+        .contents .icon {
+            height: 16px;
+            width: 16px;
+            margin: -0.1rem;
+            padding-right: 0.5rem;
+        }
+
+        #btc>g>circle {
+            fill: var(--icon-btc-color);
+        }
+
+        #eth>g>circle {
+            fill: var(--icon-eth-color);
+        }
+
         .color-mode-toggle {
             padding: 1rem 0;
             margin: 0 calc(100vw - 7rem);
@@ -253,9 +306,9 @@
             transition: 0.4s;
         }
 
-        .slider:before {
+        .slider::before {
             position: absolute;
-            content: "🌞";
+            content: "☀️";
             height: 0px;
             width: 0px;
             left: -5px;
@@ -264,12 +317,12 @@
             transition: 0.4s;
         }
 
-        .color-switcher:checked+.theme-container .slider:before {
+        .color-switcher:checked+.theme-container .slider::before {
             left: -4px;
-            content: "🌚";
+            content: "🌒";
         }
 
-        .color-switcher:checked+.theme-container .slider:before {
+        .color-switcher:checked+.theme-container .slider::before {
             transform: translateX(26px);
         }
 
@@ -277,11 +330,10 @@
             border-radius: 34px;
         }
 
-        .slider.round:before {
+        .slider.round::before {
             border-radius: 50%;
         }
-    </style>
-    <style prop="media-queries">
+
         @media only screen and (max-width: 425px) {
             :root {
                 --font-size: 20px;
@@ -310,17 +362,18 @@
                 margin: 0 calc(100vw - 5rem);
             }
 
-            .slider:before {
+            .slider::before {
                 top: 15px;
+                left: -10px;
             }
 
-            .color-switcher:checked+.theme-container .slider:before {
+            .color-switcher:checked+.theme-container .slider::before {
                 left: -10px;
             }
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .base-colors,
+            .base,
             .input,
             .slider,
             .slider::before,
@@ -344,7 +397,7 @@
         } */
     </style>
     <input id="color-switcher-input" aria-label="Toggle dark mode" type="checkbox" class="hide color-switcher">
-    <div class="theme-container grow base-colors">
+    <div class="theme-container grow base">
         <div class="color-mode-toggle">
             <label for="color-switcher-input" class="switch">
                 <span class="slider round"></span>
@@ -359,7 +412,35 @@
             </form>
         </div>
         <div class="center display"></div>
+        <footer class="contents">
+            <span class="donate-text">Like the site? Consider donating 💰</span>
+            <span class="text"><svg class="icon">
+                    <use xlink:href="#btc" /></svg>1PnZbYQRWg3gtZXReuHYeWQHjMgnxgzpdL</span>
+            <span class="text"><svg class="icon">
+                    <use xlink:href="#eth" /></svg>0x8063344af708b9eff7e5cab01a208b0b8322daf7</span>
+        </footer>
     </div>
+    <svg xmlns="http://www.w3.org/2000/svg" class="display-none">
+        <symbol id="btc" viewBox="0 0 32 32">
+            <g fill="none" fill-rule="evenodd">
+                <circle cx="16" cy="16" r="16" />
+                <path fill="#FFF" fill-rule="nonzero" d="M23.189 14.02c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.114-.92-.22-1.385-.326l.695-2.783L15.596 6l-.708 2.839c-.376-.086-.746-.17-1.104-.26l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.183-.045-1.13 4.532c-.086.212-.303.531-.793.41.018.025-1.256-.313-1.256-.313l-.858 1.978 2.25.561c.418.105.828.215 1.231.318l-.715 2.872 1.727.43.708-2.84c.472.127.93.245 1.378.357l-.706 2.828 1.728.43.715-2.866c2.948.558 5.164.333 6.097-2.333.752-2.146-.037-3.385-1.588-4.192 1.13-.26 1.98-1.003 2.207-2.538zm-3.95 5.538c-.533 2.147-4.148.986-5.32.695l.95-3.805c1.172.293 4.929.872 4.37 3.11zm.535-5.569c-.487 1.953-3.495.96-4.47.717l.86-3.45c.975.243 4.118.696 3.61 2.733z" />
+            </g>
+        </symbol>
+        <symbol id="eth" viewBox="0 0 32 32">
+            <g fill="none" fill-rule="evenodd">
+                <circle cx="16" cy="16" r="16" fill="#627EEA" />
+                <g fill="#FFF" fill-rule="nonzero">
+                    <path fill-opacity=".602" d="M16.498 4v8.87l7.497 3.35z" />
+                    <path d="M16.498 4L9 16.22l7.498-3.35z" />
+                    <path fill-opacity=".602" d="M16.498 21.968v6.027L24 17.616z" />
+                    <path d="M16.498 27.995v-6.028L9 17.616z" />
+                    <path fill-opacity=".2" d="M16.498 20.573l7.497-4.353-7.497-3.348z" />
+                    <path fill-opacity=".602" d="M9 16.22l7.498 4.353v-7.701z" />
+                </g>
+            </g>
+        </symbol>
+    </svg>
     <script>
         document.querySelector(".goToURL").setAttribute("type", "button");
         document.querySelector(".getURL").setAttribute("type", "button");
