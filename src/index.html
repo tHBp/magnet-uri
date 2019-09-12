@@ -53,7 +53,7 @@
             --light-eth-color: #627eea;
 
             /* Dark theme colors */
-            --dark-body-background: #444;
+            --dark-body-background: #121212;
             --dark-text-color: #fff;
             --dark-button-color-background: #222;
             --dark-button-color-foreground: #fff;
@@ -373,6 +373,7 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
+
             .base,
             .input,
             .slider,
@@ -444,6 +445,13 @@
     <script>
         document.querySelector(".goToURL").setAttribute("type", "button");
         document.querySelector(".getURL").setAttribute("type", "button");
+
+        const darkModePreferred = localStorage.getItem("darkModePreferred");
+
+        if (darkModePreferred) {
+            document.querySelector(".color-switcher").checked = (darkModePreferred === "true")
+        }
+
         const regex = new RegExp(/magnet.*/);
         const rootStyle = document.documentElement.style;
 
@@ -461,7 +469,7 @@
         const darkModeToggled = isDarkMode => {
             document.querySelector("head > meta[name='theme-color']").setAttribute("content", isDarkMode ?
                 "#444" : "#d2d2d2");
-            sessionStorage.setItem("darkModePreferred", isDarkMode);
+            localStorage.setItem("darkModePreferred", isDarkMode);
         }
 
         document.querySelector(".color-switcher")
