@@ -13,21 +13,24 @@
     <link rel="search" href="https://magnet-uri.netlify.com/opensearch.xml" type="application/opensearchdescription+xml" title="Convert MyLink Magnet URLs" />
 </head>
 
+
 <body>
-    <style>
+    <style prop="root-styles">
         html,
         button,
         input {
-            font-family: 'Raleway', sans-serif;
+            font-family: "Raleway", sans-serif;
         }
 
-        *:focus::placeholder {
-            opacity: 0;
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            overscroll-behavior: none;
         }
 
-        ::placeholder {
-            opacity: 1;
-            transition: opacity 0.5s;
+        .grow {
+            min-height: 100%;
         }
 
         input:focus,
@@ -36,27 +39,77 @@
         }
 
         :root {
+            /* Sizes */
             --font-size: 16px;
             --max-width: 200px;
-            --body-background: #f9f9f9;
-            --text-color: black;
-            --button-color-background: #2196f3;
-            --button-color-foreground: #fff;
-            --night-mode-background: #bcbcbc;
-            --night-mode-foreground: white;
+
+            /* Light theme colors */
+            --light-body-background: #f9f9f9;
+            --light-text-color: #000;
+            --light-button-color-background: #2196f3;
+            --light-button-color-foreground: #fff;
+            --light-color-switcher-background: #fce100;
+
+            /* Dark theme colors */
+            --dark-body-background: #444;
+            --dark-text-color: #fff;
+            --dark-button-color-background: #222;
+            --dark-button-color-foreground: #fff;
+            --dark-color-switcher-background: #222;
+        }
+
+        .theme-container {
+            /* Default light theme */
+            --body-background: var(--light-body-background);
+            --text-color: var(--light-text-color);
+            --button-color-background: var(--light-button-color-background);
+            --button-color-foreground: var(--light-button-color-foreground);
+            --color-switcher-background: var(--light-color-switcher-background);
+        }
+
+        .color-switcher:checked~.theme-container {
+            /* Apply dark theme when input is checked */
+            --body-background: var(--dark-body-background);
+            --text-color: var(--dark-text-color);
+            --button-color-background: var(--dark-button-color-background);
+            --button-color-foreground: var(--dark-button-color-foreground);
+            --color-switcher-background: var(--dark-color-switcher-background);
+        }
+
+        .base-colors {
+            background-color: var(--body-background);
+            color: var(--text-color);
+            transition: background-color 1s ease-out, color 0.5s ease-out;
+        }
+
+        .input:focus::placeholder {
+            opacity: 0;
+        }
+
+        .input::placeholder {
+            color: #969696;
+            opacity: 1;
+            transition: opacity 0.5s;
         }
 
         form {
             display: contents;
         }
 
-        body {
-            background-color: var(--body-background);
-            color: var(--text-color);
-            transition: background-color 1s ease-out, color 0.5s ease-out;
+        .hide {
+            position: absolute;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            border: 0;
+            white-space: nowrap;
         }
-
-        .container {
+    </style>
+    <style prop="form-context">
+        .form {
             display: grid;
             grid-gap: 60px;
             align-content: center;
@@ -71,7 +124,7 @@
             text-align: center;
         }
 
-        .container button {
+        .form button {
             position: relative;
             display: inline-block;
             box-sizing: border-box;
@@ -93,11 +146,11 @@
             transition: box-shadow 0.2s;
         }
 
-        .container button::-moz-focus-inner {
+        .form button::-moz-focus-inner {
             border: none;
         }
 
-        .container button::before {
+        .form button::before {
             content: "";
             position: absolute;
             top: 0;
@@ -108,7 +161,7 @@
             transition: opacity 0.2s;
         }
 
-        .container button::after {
+        .form button::after {
             content: "";
             position: absolute;
             left: 50%;
@@ -123,28 +176,28 @@
             transition: opacity 1s, transform 0.5s;
         }
 
-        .container button:hover,
-        .container button:focus {
+        .form button:hover,
+        .form button:focus {
             box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
         }
 
-        .container button:hover::before {
+        .form button:hover::before {
             opacity: 0.08;
         }
 
-        .container button:focus::before {
+        .form button:focus::before {
             opacity: 0.24;
         }
 
-        .container button:hover:focus::before {
+        .form button:hover:focus::before {
             opacity: 0.3;
         }
 
-        .container button:active {
+        .form button:active {
             box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
         }
 
-        .container button:active::after {
+        .form button:active::after {
             opacity: 0.32;
             transform: translate(-50%, -50%) scale(0);
             transition: transform 0s;
@@ -168,54 +221,67 @@
             overflow-wrap: break-word;
             user-select: all;
         }
-
-        .night-mode {
-            display: none;
+    </style>
+    <style prop="color-switcher">
+        .color-mode-toggle {
+            padding: 1rem 0;
+            margin: 0 calc(100vw - 7rem);
         }
 
-        .night-mode input[type=checkbox] {
-            height: 0;
-            width: 0;
-            visibility: hidden;
-        }
-
-        .night-mode label {
-            cursor: pointer;
-            float: right;
-            margin: 20px 200px;
-            text-indent: -9999px;
+        .switch {
+            font-size: 30px;
+            position: relative;
+            display: inline-block;
             width: 50px;
             height: 30px;
-            background: var(--night-mode-background);
-            display: block;
-            border-radius: 100px;
-            position: relative;
         }
 
-        .night-mode label:after {
-            content: '🌞';
+        .switch .color-switcher {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
             position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 24px;
-            height: 24px;
-            background: var(--night-mode-foreground);
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--color-switcher-background);
+            transition: 0.4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "🌞";
+            height: 0px;
+            width: 0px;
+            left: -5px;
+            top: 18px;
+            line-height: 0px;
+            transition: 0.4s;
+        }
+
+        .color-switcher:checked+.theme-container .slider:before {
+            left: -4px;
+            content: "🌚";
+        }
+
+        .color-switcher:checked+.theme-container .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
             border-radius: 50%;
         }
-
-        .night-mode input:checked+label {
-            background: var(--night-mode-background);
-        }
-
-        .night-mode input:checked+label:after {
-            left: calc(100% - 27px);
-            background: var(--night-mode-foreground);
-        }
-
-        .show {
-            display: block;
-        }
-
+    </style>
+    <style prop="media-queries">
         @media only screen and (max-width: 425px) {
             :root {
                 --font-size: 20px;
@@ -225,77 +291,114 @@
                 transition: background-color 0.5s ease-out, color 0.2s ease-out;
             }
 
-            .container {
+            .form {
                 margin-top: 10vh;
                 grid-template-columns: auto;
             }
 
-            .button {
+            .form button {
                 grid-column: 1/2;
+                font-size: 16px;
             }
 
             .display {
                 width: 75vw;
             }
 
-            .night-mode label {
-                margin: 20px;
+            .color-mode-toggle {
+                padding: 1rem 0;
+                margin: 0 calc(100vw - 5rem);
+            }
+
+            .slider:before {
+                top: 15px;
+            }
+
+            .color-switcher:checked+.theme-container .slider:before {
+                left: -10px;
             }
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            .base-colors,
+            .input,
+            .slider,
+            .slider::before,
+            .form button,
+            .form button::before,
+            .form button::after,
+            .form button:active::after,
+            .input::placeholder {
+                transition: none;
+            }
+        }
+
+        /* @media (prefers-color-scheme: dark) {
+            .theme-container {
+                --body-background: var(--dark-body-background);
+                --text-color: var(--dark-text-color);
+                --button-color-background: var(--dark-button-color-background);
+                --button-color-foreground: var(--dark-button-color-foreground);
+                --color-switcher-background: var(--dark-color-switcher-background);
+            }
+        } */
     </style>
-    <div class="night-mode">
-        <input type="checkbox" id="switch" />
-        <label for="switch">Toggle Night Mode</label>
+    <input id="color-switcher-input" aria-label="Toggle dark mode" type="checkbox" class="hide color-switcher">
+    <div class="theme-container grow base-colors">
+        <div class="color-mode-toggle">
+            <label for="color-switcher-input" class="switch">
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div class="form">
+            <form method="POST" action="/.netlify/functions/parseLink">
+                <label class="center" for="url">Enter the URL</label>
+                <input name="url" class="center input" autocomplete="off" placeholder="magnet:?" type="url" id="url">
+                <button name="getURL" type="submit" class="getURL">Get URL</button>
+                <button name="goToURL" type="submit" class="goToURL">Go to URL</button>
+            </form>
+        </div>
+        <div class="center display"></div>
     </div>
-    <div class="container">
-        <form method="POST" action="/.netlify/functions/parseLink">
-            <label class="center" for="url">Enter the URL</label>
-            <input name="url" class="center input" autocomplete="off" placeholder="magnet:?" type="url" id="url">
-            <button name="getURL" type="submit" class="center getURL">Get URL</button>
-            <button name="goToURL" type="submit" class="center goToURL">Go to URL</button>
-        </form>
-    </div>
-    <div class="center display"></div>
     <script>
-        document.querySelector(".night-mode").classList += " show";
         document.querySelector(".goToURL").setAttribute("type", "button");
         document.querySelector(".getURL").setAttribute("type", "button");
         const regex = new RegExp(/magnet.*/);
         const rootStyle = document.documentElement.style;
 
-        const getURL = (enteredURL) => enteredURL.match(regex) ?
+        const getURL = enteredURL => enteredURL.match(regex) ?
             decodeURIComponent(enteredURL.match(regex)[0]) : null;
 
-        const toggleDarkMode = (isDarkMode) => {
-            rootStyle.setProperty("--body-background", isDarkMode ? "#282c35" : "#f9f9f9");
-            rootStyle.setProperty("--text-color", isDarkMode ? "#fff" : "#000");
-            rootStyle.setProperty("--button-color", isDarkMode ? "#3e3e3e" : "#006900");
-            rootStyle.setProperty("--night-mode-background", isDarkMode ? "#000" : "#bcbcbc");
+        const goToURL = improperUrl => {
+            const redirectURL = getURL(improperUrl);
+            if (redirectURL) {
+                return window.location.href = redirectURL;
+            }
+            document.querySelector(".display").innerText = "Invalid URL";
+        };
+
+        const darkModeToggled = isDarkMode => {
             document.querySelector("head > meta[name='theme-color']").setAttribute("content", isDarkMode ?
-                "#282c35" : "#d2d2d2");
+                "#444" : "#d2d2d2");
+            sessionStorage.setItem("darkModePreferred", isDarkMode);
         }
+
+        document.querySelector(".color-switcher")
+            .addEventListener("change", ({ target: { checked } }) => darkModeToggled(checked));
 
         document.querySelector(".getURL").addEventListener("click", () => {
             document.querySelector(".display").innerText = getURL(document.querySelector(".input").value) ||
                 "Invalid URL";
         });
 
-        document.querySelector("#switch")
-            .addEventListener("click", () => toggleDarkMode(document.querySelector("#switch").checked));
-
         document.querySelector(".goToURL").addEventListener("click", () => {
-            const redirectURL = getURL(document.querySelector(".input").value);
-            if (redirectURL) {
-                return window.location.href = redirectURL;
-            }
-            document.querySelector(".display").innerText = "Invalid URL";
+            goToURL(document.querySelector(".input").value);
         });
 
         const searchParamsLink = (new URLSearchParams(window.location.search)).get("link");
 
         if (searchParamsLink) {
-            document.getElementById("url").value = searchParamsLink;
-            document.querySelector("button[name='goToURL']").click();
+            goToURL(searchParamsLink);
         }
     </script>
 </body>
