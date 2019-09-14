@@ -51,6 +51,7 @@
             --light-color-switcher-background: #fce100;
             --light-btc-color: #f7931a;
             --light-eth-color: #627eea;
+            --light-footer-shadow-opacity: 0.25;
 
             /* Dark theme colors */
             --dark-body-background: #121212;
@@ -59,6 +60,7 @@
             --dark-button-color-foreground: #fff;
             --dark-color-switcher-background: #222;
             --dark-btc-color: #222;
+            --dark-footer-shadow-opacity: 1;
         }
 
         .theme-container {
@@ -70,6 +72,7 @@
             --color-switcher-background: var(--light-color-switcher-background);
             --icon-btc-color: var(--light-btc-color);
             --icon-eth-color: var(--light-eth-color);
+            --footer-shadow-opacity: var(--light-footer-shadow-opacity);
         }
 
         .color-switcher:checked~.theme-container {
@@ -81,6 +84,7 @@
             --color-switcher-background: var(--dark-color-switcher-background);
             --icon-btc-color: var(--dark-btc-color);
             --icon-eth-color: var(--dark-btc-color);
+            --footer-shadow-opacity: var(--dark-footer-shadow-opacity);
         }
 
         .base {
@@ -123,7 +127,7 @@
 
         footer {
             flex-shrink: 0;
-            box-shadow: 0px -2px 20px 0px rgba(0, 0, 0, 0.25);
+            box-shadow: 0px -2px 20px 0px rgba(0, 0, 0, var(--footer-shadow-opacity));
             color: var(--text-color);
         }
 
@@ -443,17 +447,16 @@
         </symbol>
     </svg>
     <script>
-        document.querySelector(".goToURL").setAttribute("type", "button");
-        document.querySelector(".getURL").setAttribute("type", "button");
+        const colorSwitcherElement = document.querySelector(".color-switcher");
+        const goToURLElement = document.querySelector(".goToURL");
+        const getURLElement = document.querySelector(".getURL");
+        const outputDisplayElement = document.querySelector(".display");
+        const urlInputElement = document.querySelector(".input");
 
-        const darkModePreferred = localStorage.getItem("darkModePreferred");
-
-        if (darkModePreferred) {
-            document.querySelector(".color-switcher").checked = (darkModePreferred === "true")
-        }
+        goToURLElement.setAttribute("type", "button");
+        getURLElement.setAttribute("type", "button");
 
         const regex = new RegExp(/magnet.*/);
-        const rootStyle = document.documentElement.style;
 
         const getURL = enteredURL => enteredURL.match(regex) ?
             decodeURIComponent(enteredURL.match(regex)[0]) : null;
@@ -463,31 +466,38 @@
             if (redirectURL) {
                 return window.location.href = redirectURL;
             }
-            document.querySelector(".display").innerText = "Invalid URL";
+            outputDisplayElement.innerText = "Invalid URL";
         };
 
         const darkModeToggled = isDarkMode => {
             document.querySelector("head > meta[name='theme-color']").setAttribute("content", isDarkMode ?
-                "#444" : "#d2d2d2");
+                "#121212" : "#d2d2d2");
             localStorage.setItem("darkModePreferred", isDarkMode);
         }
 
-        document.querySelector(".color-switcher")
+        colorSwitcherElement
             .addEventListener("change", ({ target: { checked } }) => darkModeToggled(checked));
 
-        document.querySelector(".getURL").addEventListener("click", () => {
-            document.querySelector(".display").innerText = getURL(document.querySelector(".input").value) ||
+        getURLElement.addEventListener("click", () => {
+            outputDisplayElement.innerText = getURL(urlInputElement.value) ||
                 "Invalid URL";
         });
 
-        document.querySelector(".goToURL").addEventListener("click", () => {
-            goToURL(document.querySelector(".input").value);
+        goToURLElement.addEventListener("click", () => {
+            goToURL(urlInputElement.value);
         });
 
         const searchParamsLink = (new URLSearchParams(window.location.search)).get("link");
 
         if (searchParamsLink) {
             goToURL(searchParamsLink);
+        }
+
+        const darkModePreferred = localStorage.getItem("darkModePreferred");
+
+        if (darkModePreferred) {
+            colorSwitcherElement.checked = (darkModePreferred === "true");
+            colorSwitcherElement.dispatchEvent(new Event("change"));
         }
     </script>
 </body>
