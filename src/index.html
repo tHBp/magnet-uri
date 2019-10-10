@@ -390,16 +390,6 @@
                 transition: none;
             }
         }
-
-        /* @media (prefers-color-scheme: dark) {
-            .theme-container {
-                --body-background: var(--dark-body-background);
-                --text-color: var(--dark-text-color);
-                --button-color-background: var(--dark-button-color-background);
-                --button-color-foreground: var(--dark-button-color-foreground);
-                --color-switcher-background: var(--dark-color-switcher-background);
-            }
-        } */
     </style>
     <input id="color-switcher-input" aria-label="Toggle dark mode" type="checkbox" class="hide color-switcher">
     <div class="theme-container grow base">
@@ -447,58 +437,71 @@
         </symbol>
     </svg>
     <script>
-        const colorSwitcherElement = document.querySelector(".color-switcher");
-        const goToURLElement = document.querySelector(".goToURL");
-        const getURLElement = document.querySelector(".getURL");
-        const outputDisplayElement = document.querySelector(".display");
-        const urlInputElement = document.querySelector(".input");
+        (() => {
+            const colorSwitcherElement = document.querySelector(".color-switcher");
+            const goToURLElement = document.querySelector(".goToURL");
+            const getURLElement = document.querySelector(".getURL");
+            const outputDisplayElement = document.querySelector(".display");
+            const urlInputElement = document.querySelector(".input");
 
-        goToURLElement.setAttribute("type", "button");
-        getURLElement.setAttribute("type", "button");
+            goToURLElement.setAttribute("type", "button");
+            getURLElement.setAttribute("type", "button");
 
-        const regex = new RegExp(/magnet.*/);
+            const regex = new RegExp(/magnet.*/);
 
-        const getURL = enteredURL => enteredURL.match(regex) ?
-            decodeURIComponent(enteredURL.match(regex)[0]) : null;
+            const getURL = enteredURL => enteredURL.match(regex) ?
+                decodeURIComponent(enteredURL.match(regex)[0]) : null;
 
-        const goToURL = improperUrl => {
-            const redirectURL = getURL(improperUrl);
-            if (redirectURL) {
-                return window.location.href = redirectURL;
+            const goToURL = improperUrl => {
+                const redirectURL = getURL(improperUrl);
+                if (redirectURL) {
+                    return window.location.href = redirectURL;
+                }
+                outputDisplayElement.innerText = "Invalid URL";
+            };
+
+            getURLElement.addEventListener("click", () => {
+                outputDisplayElement.innerText = getURL(urlInputElement.value) ||
+                    "Invalid URL";
+            });
+
+            goToURLElement.addEventListener("click", () => {
+                goToURL(urlInputElement.value);
+            });
+
+            const searchParamsLink = (new URLSearchParams(window.location.search)).get("link");
+
+            if (searchParamsLink) {
+                goToURL(searchParamsLink);
             }
-            outputDisplayElement.innerText = "Invalid URL";
-        };
 
-        const darkModeToggled = isDarkMode => {
-            document.querySelector("head > meta[name='theme-color']").setAttribute("content", isDarkMode ?
-                "#121212" : "#d2d2d2");
-            localStorage.setItem("darkModePreferred", isDarkMode);
-        }
+            const toggleDarkMode = ({ isDarkMode, setStorage }) => {
+                colorSwitcherElement.checked = isDarkMode;
+                document.querySelector("head > meta[name='theme-color']").setAttribute("content", isDarkMode ?
+                    "#121212" : "#d2d2d2");
+                if (setStorage) colorSwitcherElement.dispatchEvent(new Event("change"));
+            };
 
-        colorSwitcherElement
-            .addEventListener("change", ({ target: { checked } }) => darkModeToggled(checked));
+            colorSwitcherElement
+                .addEventListener("change", ({ target: { checked } }) => localStorage.setItem("darkModePreferred", checked));
 
-        getURLElement.addEventListener("click", () => {
-            outputDisplayElement.innerText = getURL(urlInputElement.value) ||
-                "Invalid URL";
-        });
+            const darkModePreferred = localStorage.getItem("darkModePreferred");
 
-        goToURLElement.addEventListener("click", () => {
-            goToURL(urlInputElement.value);
-        });
-
-        const searchParamsLink = (new URLSearchParams(window.location.search)).get("link");
-
-        if (searchParamsLink) {
-            goToURL(searchParamsLink);
-        }
-
-        const darkModePreferred = localStorage.getItem("darkModePreferred");
-
-        if (darkModePreferred) {
-            colorSwitcherElement.checked = (darkModePreferred === "true");
-            colorSwitcherElement.dispatchEvent(new Event("change"));
-        }
+            if (darkModePreferred) {
+                toggleDarkMode({
+                    isDarkMode: darkModePreferred === "true",
+                    setStorage: true
+                });
+            } else {
+                const systemDarkModeEnabled = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (systemDarkModeEnabled) {
+                    toggleDarkMode({
+                        isDarkMode: true,
+                        setStorage: false
+                    });
+                }
+            }
+        })();
     </script>
 </body>
 

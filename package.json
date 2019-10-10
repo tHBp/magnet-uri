@@ -7,15 +7,12 @@
     "lambda-local": "netlify-lambda serve src/functions",
     "build": "node build.js"
   },
-  "dependencies": {
+  "devDependencies": {
     "fs-extra": "^7.0.1",
     "html-minifier": "^3.5.21"
   },
   "resolutions": {
     "uglify-js": "npm:terser"
-  },
-  "devDependencies": {
-    "netlify-lambda": "^1.4.3"
   },
   "engines": {
     "node": ">=11.12.0"
